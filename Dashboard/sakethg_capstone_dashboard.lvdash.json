@@ -1,0 +1,1156 @@
+{
+  "datasets": [
+    {
+      "name": "c9808053",
+      "displayName": "Daily Sentiment vs Price Movement Analysis",
+      "queryLines": [
+        "SELECT \n",
+        "    event_date,\n",
+        "    positive_mentions,\n",
+        "    negative_mentions,\n",
+        "    neutral_mentions,\n",
+        "    price_change_pct,\n",
+        "    sentiment_direction,\n",
+        "    price_direction,\n",
+        "    aligned_flag,\n",
+        "    total_mentions\n",
+        "FROM tabular.dataexpert.sakethg_capstone_project_1_gold_sentiment_price_combined\n",
+        "WHERE symbol = :symbol\n",
+        "ORDER BY event_date;\n",
+        "\n",
+        "\n"
+      ],
+      "parameters": [
+        {
+          "displayName": "symbol",
+          "keyword": "symbol",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "BTC"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "f90e7d0e",
+      "displayName": "Sentiment-Price Alignment Breakdown",
+      "queryLines": [
+        "SELECT \n",
+        "    CASE WHEN aligned_flag = 1 THEN 'Aligned' ELSE 'Not Aligned' END AS alignment_status,\n",
+        "    COUNT(*) AS day_count\n",
+        "FROM tabular.dataexpert.sakethgadde_gold_sentiment_price_combined\n",
+        "WHERE symbol = :symbol\n",
+        "GROUP BY aligned_flag;\n"
+      ],
+      "parameters": [
+        {
+          "displayName": "symbol",
+          "keyword": "symbol",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "ADA"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2d07c8f7",
+      "displayName": "Does Sentiment Matter for a symbol?",
+      "queryLines": [
+        "SELECT \n",
+        "    symbol,\n",
+        "    ROUND(SUM(aligned_flag) * 100.0 / COUNT(*), 2) AS alignment_percentage,\n",
+        "    CASE \n",
+        "        WHEN (SUM(aligned_flag) * 100.0 / COUNT(*)) > 50 THEN 'Sentiment Matters (Yes)' \n",
+        "        ELSE 'Sentiment Does Not Matter (No)' \n",
+        "    END AS sentiment_impact_summary\n",
+        "FROM tabular.dataexpert.sakethgadde_gold_sentiment_price_combined\n",
+        "WHERE symbol = :symbol\n",
+        "GROUP BY symbol;\n"
+      ],
+      "parameters": [
+        {
+          "displayName": "symbol",
+          "keyword": "symbol",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "ADA"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "25f7af04",
+      "displayName": "Reddit Sentiment Impact overall",
+      "queryLines": [
+        "SELECT \n",
+        "    ROUND(SUM(aligned_flag) * 100.0 / COUNT(*), 2) AS alignment_percentage,\n",
+        "    CASE \n",
+        "        WHEN (SUM(aligned_flag) * 100.0 / COUNT(*)) > 50 THEN 'Reddit Sentiment Influential (Yes)' \n",
+        "        ELSE 'Reddit Sentiment Not Influential (No)' \n",
+        "    END AS sentiment_impact_summary\n",
+        "FROM tabular.dataexpert.sakethgadde_gold_sentiment_price_combined\n"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "bea14182",
+      "displayName": "Dashboard",
+      "layout": [
+        {
+          "widget": {
+            "name": "43fe9fb1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c9808053",
+                  "fields": [
+                    {
+                      "name": "daily(event_date)",
+                      "expression": "DATE_TRUNC(\"DAY\", `event_date`)"
+                    },
+                    {
+                      "name": "negative_mentions",
+                      "expression": "`negative_mentions`"
+                    },
+                    {
+                      "name": "neutral_mentions",
+                      "expression": "`neutral_mentions`"
+                    },
+                    {
+                      "name": "positive_mentions",
+                      "expression": "`positive_mentions`"
+                    },
+                    {
+                      "name": "price_change_pct",
+                      "expression": "`price_change_pct`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "combo",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(event_date)",
+                  "axis": {
+                    "labelAngle": 0,
+                    "title": "Date"
+                  },
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "natural-order"
+                    }
+                  },
+                  "displayName": "Date"
+                },
+                "label": {
+                  "show": false
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "negative_mentions",
+                        "displayName": "Negative"
+                      },
+                      {
+                        "fieldName": "neutral_mentions",
+                        "displayName": "Neutral"
+                      },
+                      {
+                        "fieldName": "positive_mentions",
+                        "displayName": "Positive"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative",
+                      "reverse": false
+                    }
+                  },
+                  "secondary": {
+                    "fields": [
+                      {
+                        "fieldName": "price_change_pct",
+                        "displayName": "Daily Price % Change"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative"
+                    }
+                  }
+                }
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "widgetBorderColor"
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "fontColor"
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": "Reddit Sentiment vs Daily Price Change for Coin",
+                "description": "Stacked bars show daily Reddit sentiment breakdown. The black line shows price change %, highlighting how sentiment trends relate to price fluctuations",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "806bd300",
+            "queries": [
+              {
+                "name": "parameter_dashboards/01f056d812381913aa30a5f532a82195/datasets/01f059eb722d15b2ada4d5e317f919e9_symbol",
+                "query": {
+                  "datasetName": "c9808053",
+                  "parameters": [
+                    {
+                      "name": "symbol",
+                      "keyword": "symbol"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "parameterName": "symbol",
+                    "queryName": "parameter_dashboards/01f056d812381913aa30a5f532a82195/datasets/01f059eb722d15b2ada4d5e317f919e9_symbol"
+                  }
+                ]
+              },
+              "disallowAll": true,
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": "Symbol",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 3,
+            "width": 1,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "bd55cccb",
+            "queries": [
+              {
+                "name": "dashboards/01f056d812381913aa30a5f532a82195/datasets/01f059eb722d15b2ada4d5e317f919e9_event_date",
+                "query": {
+                  "datasetName": "c9808053",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    },
+                    {
+                      "name": "event_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "event_date",
+                    "displayName": "event_date",
+                    "queryName": "dashboards/01f056d812381913aa30a5f532a82195/datasets/01f059eb722d15b2ada4d5e317f919e9_event_date"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": "Date Range",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 3,
+            "width": 3,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "3760ca7a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f90e7d0e",
+                  "fields": [
+                    {
+                      "name": "sum(day_count)",
+                      "expression": "SUM(`day_count`)"
+                    },
+                    {
+                      "name": "alignment_status",
+                      "expression": "`alignment_status`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(day_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Alignment Rate"
+                  },
+                  "displayName": "Alignment Rate"
+                },
+                "color": {
+                  "fieldName": "alignment_status",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "Aligned",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 1
+                        }
+                      },
+                      {
+                        "value": "Not Aligned",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 8
+                        }
+                      }
+                    ],
+                    "sort": {
+                      "by": "angle-reversed"
+                    }
+                  },
+                  "legend": {
+                    "hide": false,
+                    "hideTitle": true,
+                    "position": "bottom"
+                  },
+                  "displayName": "alignment_status"
+                },
+                "extra": [
+                  {
+                    "fieldName": "sum(day_count)",
+                    "format": {
+                      "type": "number-percent",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 2
+                      }
+                    },
+                    "displayName": "Sum of day_count"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "title": "Sentiment-Price Alignment Breakdown",
+                "description": "Displays the proportion of days where Reddit sentiment and price movement were aligned for the selected coin",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 16,
+            "width": 5,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "d7725e6e",
+            "queries": [
+              {
+                "name": "parameter_dashboards/01f056d812381913aa30a5f532a82195/datasets/01f059ef4a391a20b4a2ba04066584c5_symbol",
+                "query": {
+                  "datasetName": "f90e7d0e",
+                  "parameters": [
+                    {
+                      "name": "symbol",
+                      "keyword": "symbol"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "parameterName": "symbol",
+                    "queryName": "parameter_dashboards/01f056d812381913aa30a5f532a82195/datasets/01f059ef4a391a20b4a2ba04066584c5_symbol"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Pick a Coin For he Chart on Right ➡️",
+                "showDescription": false,
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "b4dc2e87",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# **Daily Sentiment vs Price Movement Analysis**\n",
+                "\n",
+                "- Track how daily Reddit sentiment aligns with crypto price movement. \n",
+                "- The chart stacks sentiment counts over time with price change.\n",
+                "- The table shows daily alignment between crowd mood and market direction."
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "a28103f7",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c9808053",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    },
+                    {
+                      "name": "sentiment_direction",
+                      "expression": "`sentiment_direction`"
+                    },
+                    {
+                      "name": "price_direction",
+                      "expression": "`price_direction`"
+                    },
+                    {
+                      "name": "price_change_pct",
+                      "expression": "`price_change_pct`"
+                    },
+                    {
+                      "name": "total_mentions",
+                      "expression": "`total_mentions`"
+                    },
+                    {
+                      "name": "aligned_flag",
+                      "expression": "`aligned_flag`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "event_date",
+                    "dateTimeFormat": "YYYY-MM-DD",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 0,
+                    "title": "event_date",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "event_date"
+                  },
+                  {
+                    "fieldName": "sentiment_direction",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 1,
+                    "title": "sentiment_direction",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "sentiment_direction"
+                  },
+                  {
+                    "fieldName": "price_direction",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 2,
+                    "title": "price_direction",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "price_direction"
+                  },
+                  {
+                    "fieldName": "price_change_pct",
+                    "numberFormat": "0.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 6,
+                    "title": "price_change_pct",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "price_change_pct"
+                  },
+                  {
+                    "fieldName": "total_mentions",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 7,
+                    "title": "total_mentions",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "total_mentions"
+                  },
+                  {
+                    "fieldName": "aligned_flag",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 8,
+                    "title": "Aligned",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "cellFormat": {
+                      "default": {
+                        "foregroundColor": null
+                      },
+                      "rules": [
+                        {
+                          "if": {
+                            "column": "aligned_flag",
+                            "fn": "=",
+                            "literal": "1"
+                          },
+                          "value": {
+                            "foregroundColor": {
+                              "themeColorType": "visualizationColors",
+                              "position": 3
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "column": "aligned_flag",
+                            "fn": "=",
+                            "literal": "0"
+                          },
+                          "value": {
+                            "foregroundColor": {
+                              "themeColorType": "visualizationColors",
+                              "position": 4
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "displayName": "aligned_flag"
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "positive_mentions",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 3,
+                  "title": "positive_mentions",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "negative_mentions",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 4,
+                  "title": "negative_mentions",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "neutral_mentions",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 5,
+                  "title": "neutral_mentions",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "title": "Daily Sentiment vs Price Direction Table",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 10,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "2268f7fd",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# **For which coins does the reddit sentiment actually matter?**\n",
+                "\n",
+                "Calculates the percentage of days where Reddit sentiment aligned with price movement for the selected coin. If alignment exceeds 50%, the chart concludes that sentiment likely influenced market behavior.\n"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 24,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "4c5f0e40",
+            "queries": [
+              {
+                "name": "parameter_dashboards/01f056d812381913aa30a5f532a82195/datasets/01f05b56159d1cf6a0a53f0399cfb054_symbol",
+                "query": {
+                  "datasetName": "2d07c8f7",
+                  "parameters": [
+                    {
+                      "name": "symbol",
+                      "keyword": "symbol"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "parameterName": "symbol",
+                    "queryName": "parameter_dashboards/01f056d812381913aa30a5f532a82195/datasets/01f05b56159d1cf6a0a53f0399cfb054_symbol"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Pick a Coin For the Chart"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 26,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "d4aafffa",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2d07c8f7",
+                  "fields": [
+                    {
+                      "name": "symbol",
+                      "expression": "`symbol`"
+                    },
+                    {
+                      "name": "sentiment_impact_summary",
+                      "expression": "`sentiment_impact_summary`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sentiment_impact_summary",
+                  "style": {
+                    "color": {
+                      "themeColorType": "fontColor"
+                    },
+                    "bold": true,
+                    "fontSize": 56
+                  },
+                  "displayName": "sentiment_impact_summary"
+                },
+                "target": {
+                  "fieldName": "symbol",
+                  "style": {
+                    "color": {
+                      "themeColorType": "fontColor"
+                    },
+                    "bold": true,
+                    "fontSize": 42
+                  },
+                  "displayName": "symbol"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 26,
+            "width": 5,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "a2eade7a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2d07c8f7",
+                  "fields": [
+                    {
+                      "name": "alignment_percentage",
+                      "expression": "`alignment_percentage`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "alignment_percentage",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    },
+                    "hideGroupSeparator": false
+                  },
+                  "style": {
+                    "bold": true,
+                    "fontSize": 60,
+                    "rules": [
+                      {
+                        "condition": {
+                          "operator": ">=",
+                          "operand": {
+                            "type": "data-value",
+                            "value": "50"
+                          }
+                        },
+                        "color": "#00A972",
+                        "bold": true
+                      },
+                      {
+                        "condition": {
+                          "operator": "<",
+                          "operand": {
+                            "type": "data-value",
+                            "value": "50"
+                          }
+                        },
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      }
+                    ]
+                  },
+                  "displayName": "alignment_percentage"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "How much Percent does it matter?",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 28,
+            "width": 1,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "273359a2",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# **Does Reddit Sentiment Really Influence the Prices in a holistic perspective?**\n",
+                "\n",
+                "- This KPI shows the overall alignment rate between Reddit sentiment and price movement across all cryptocurrencies. \n",
+                "- It helps assess whether Reddit sentiment consistently influences market trends on a broader scale."
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 32,
+            "width": 6,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "04052f3e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "25f7af04",
+                  "fields": [
+                    {
+                      "name": "sentiment_impact_summary",
+                      "expression": "`sentiment_impact_summary`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sentiment_impact_summary",
+                  "style": {
+                    "bold": true,
+                    "color": {
+                      "themeColorType": "visualizationColors",
+                      "position": 6
+                    }
+                  },
+                  "displayName": "sentiment_impact_summary"
+                }
+              },
+              "frame": {
+                "title": "",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 35,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "b41fb481",
+            "multilineTextboxSpec": {
+              "lines": [
+                "###                 **Select Crypto Symbol and Date Range**"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 2,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    }
+  }
+}
