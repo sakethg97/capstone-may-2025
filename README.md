@@ -117,21 +117,23 @@ A star schema simplifies joins, supports semantic modeling, and keeps the fact t
 ## 🔄 DAG & Execution Flow
 
 - The following DAG shows the ingestion, DLT pipeline layers, and Gold-layer materialized views.  
-<img style="float:right" src="/Workspace/Users/gadde.saketh@gmail.com/Bootcamp/capstone-may-2025/Images/output.png" width="700"/>
+![output](https://github.com/user-attachments/assets/584e0d6f-85b4-4bf9-aec6-4298d5ffd1fd)
+
 
 ---
 
 ## 🖼️ Succesfull Pipeline Runs and Visualization Charts
 
 - Screenshot of successful pipeline run DAG
-<img style="float:right" src="/Workspace/Users/gadde.saketh@gmail.com/Bootcamp/capstone-may-2025/Images/DLT_Pipeline_DAG" width="700"/>
+<img width="1181" alt="Screenshot 2025-07-07 at 18 32 41" src="https://github.com/user-attachments/assets/f0e801ce-d2bd-4048-add7-c86928c583d3" />
+
 
 - Screenshot of successful pipeline run Tables
-<img style="float:right" src="/Workspace/Users/gadde.saketh@gmail.com/Bootcamp/capstone-may-2025/Images/DLT_Pipeline_Tables" width="700"/>
+<img width="755" alt="Screenshot 2025-07-07 at 18 36 05" src="https://github.com/user-attachments/assets/4a936707-3ddd-4fc5-a509-266a668f43d4" />
+
 
 - Sample KPI showing correlation between reddit sentiment and prices daily for a single coin (Eg. BTC)
-<img style="float:right" src="/Workspace/Users/gadde.saketh@gmail.com/Bootcamp/capstone-may-2025/Images/Sample KPI" width="700"/>
-
+<img width="1242" alt="Screenshot 2025-07-07 at 18 59 19" src="https://github.com/user-attachments/assets/a77f0e1d-14f7-4c2d-95f6-2dc186b2b4a9" />
 
 ---
 
